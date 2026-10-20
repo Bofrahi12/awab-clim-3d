@@ -185,11 +185,58 @@ footer .fine{border-top:1px solid rgba(255,255,255,.16);margin-top:34px;padding-
   .hero p{text-shadow:0 1px 10px rgba(4,26,44,.6)}
 }
 @media (min-width:761px){ header:not(.scrolled){background:linear-gradient(to bottom,rgba(4,26,44,.52),rgba(4,26,44,0))} }
+
+/* ===== couche mondiale 2026 ===== */
+#preloader{position:fixed;inset:0;z-index:300;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:transform .8s cubic-bezier(.7,0,.2,1)}
+#preloader.gone{transform:translateY(-101%)}
+#preloader .pl-logo{font-size:1.7rem;font-weight:800;letter-spacing:1px}
+#preloader .pl-logo span{color:#8fd3ff}
+#preloader .pl-pct{font-size:3rem;font-weight:800;color:var(--warm)}
+#preloader .pl-bar{width:min(300px,70vw);height:5px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden}
+#preloader .pl-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--warm))}
+#preloader .pl-note{color:#9dc0da;font-size:.88rem}
+.grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:90;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 7s steps(8) infinite}
+@keyframes grain{0%,100%{transform:translate(0,0)}25%{transform:translate(-2%,1%)}50%{transform:translate(1%,-2%)}75%{transform:translate(-1%,2%)}}
+#cursorDot{position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;background:var(--warm);z-index:250;pointer-events:none;transform:translate(-50%,-50%);display:none}
+#cursorRing{position:fixed;top:0;left:0;width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,122,26,.55);z-index:250;pointer-events:none;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s;display:none}
+#cursorRing.grow{width:58px;height:58px;border-color:rgba(11,107,203,.7)}
+@media (pointer:fine){ #cursorDot,#cursorRing{display:block} }
+.hero-zone{height:250vh;position:relative;background:var(--navy)}
+.hero-stick{position:sticky;top:0;height:100svh;overflow:hidden}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,26,44,.9) 6%,rgba(4,26,44,.28) 55%,rgba(4,26,44,.22));z-index:1}
+.hero-copy{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;color:#fff}
+.hero-copy .wrap{width:100%;padding-block:110px 76px}
+.hero-phase{transition:opacity .35s ease,transform .35s ease}
+.hero-phase.off{opacity:0;transform:translateY(18px);pointer-events:none;position:absolute;visibility:hidden}
+.hero-phase{position:relative}
+.hero-copy .wrap{position:relative}
+#heroPhase2{position:absolute;left:20px;right:20px;bottom:0}
+.hero-film-tag{position:absolute;top:86px;right:20px;z-index:3;background:rgba(4,26,44,.66);color:#cfe8ff;font-size:.8rem;font-weight:700;padding:6px 14px;border-radius:999px;backdrop-filter:blur(4px)}
+.marquee{background:var(--navy);color:#fff;overflow:hidden;padding-block:14px;border-block:1px solid rgba(255,255,255,.12)}
+.marquee .track{display:flex;gap:0;width:max-content;animation:mq 26s linear infinite;font-weight:800;letter-spacing:1.5px;font-size:1.02rem;white-space:nowrap}
+.marquee .track span{padding-inline:18px}
+.marquee .track b{color:var(--warm)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.stat{background:var(--navy);color:#fff;border-radius:var(--radius);padding:22px 14px;text-align:center}
+.stat .num{font-size:2.3rem;font-weight:800;color:#8fd3ff;line-height:1.1}
+.stat .lbl{color:#bcd9f2;font-size:.92rem;font-weight:700}
+[data-depth]{will-change:transform}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
 <div id="progress" aria-hidden="true"></div>
+<div id="preloader" role="status" aria-label="Chargement du site">
+  <div class="pl-logo">AWAB <span>CLIM</span></div>
+  <div class="pl-pct" id="plPct">0%</div>
+  <div class="pl-bar"><i id="plBar"></i></div>
+  <p class="pl-note">Préparation de la visite filmée…</p>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div id="cursorDot" aria-hidden="true"></div>
+<div id="cursorRing" aria-hidden="true"></div>
 
 <header id="siteHeader">
   <div class="wrap nav">
@@ -211,20 +258,38 @@ footer .fine{border-top:1px solid rgba(255,255,255,.16);margin-top:34px;padding-
 </header>
 
 <main id="main">
-<!-- HERO -->
-<section class="hero" id="top">
-  <img class="bg" id="heroBg" src="img/hero.jpg" alt="Technicien AWAB CLIM contrôlant une unité extérieure de climatisation" fetchpriority="high">
-  <div class="wrap hero-in">
-    <span class="kicker">AWAB CLIM · Tanger · 12 ans d'expérience</span>
-    <h1>Froid l'été. <span class="cool">Confort</span> toute l'année. <span class="hot">Chaud</span> quand il faut.</h1>
-    <p>« Votre confort, notre priorité ! » — Installation, dépannage, entretien et recharge de climatisation à Tanger, par Ayoub El Jarti et son équipe.</p>
-    <div class="hero-cta">
-      <a class="btn btn-wa" href="https://wa.me/212699963530?text=Bonjour%20AWAB%20CLIM%2C%20je%20souhaite%20un%20devis." target="_blank" rel="noopener">💬 Devis sur WhatsApp</a>
-      <a class="btn btn-ghost" href="tel:+212699963530">📞 Appeler maintenant</a>
-    </div>
-    <p class="scroll-hint"><span aria-hidden="true">↓</span> Faites défiler — jusqu'au projet réel, filmé chez un client</p>
+<!-- HERO FILM -->
+<section class="hero-zone" id="top" aria-label="AWAB CLIM — visite filmée, du chantier au confort">
+  <div class="hero-stick">
+    <canvas id="heroCanvas" width="720" height="1280" role="img" aria-label="Visite filmée d'un chantier AWAB CLIM — faites défiler pour avancer"></canvas>
+    <div class="hero-shade"></div>
+    <span class="hero-film-tag">🎥 Chantier réel · Tanger — scrollez pour visiter</span>
+    <div class="hero-copy"><div class="wrap">
+      <div class="hero-phase" id="heroPhase1">
+        <span class="kicker">AWAB CLIM · Tanger · 12 ans d'expérience</span>
+        <h1 style="font-size:clamp(2.1rem,6vw,4.1rem);font-weight:800;line-height:1.22;margin-block:18px 10px;max-width:17ch">Froid l'été. <span style="color:#8fd3ff">Confort</span> toute l'année. <span style="color:#ffb37a">Chaud</span> quand il faut.</h1>
+        <p style="font-size:clamp(1rem,2vw,1.26rem);max-width:58ch;color:#e7f3ff">« Votre confort, notre priorité ! » — Installation, dépannage, entretien et recharge de climatisation à Tanger, par Ayoub El Jarti et son équipe.</p>
+        <div class="hero-cta">
+          <a class="btn btn-wa" href="https://wa.me/212699963530?text=Bonjour%20AWAB%20CLIM%2C%20je%20souhaite%20un%20devis." target="_blank" rel="noopener">💬 Devis sur WhatsApp</a>
+          <a class="btn btn-ghost" href="tel:+212699963530">📞 Appeler maintenant</a>
+        </div>
+        <p class="scroll-hint"><span aria-hidden="true">↓</span> Faites défiler — la visite du chantier commence</p>
+      </div>
+      <div class="hero-phase off" id="heroPhase2">
+        <span class="kicker">Du chantier… au confort livré</span>
+        <h2 style="font-size:clamp(1.9rem,5vw,3.4rem);font-weight:800;line-height:1.25;margin-block:16px 8px;max-width:20ch">Vous venez de traverser un vrai chantier AWAB CLIM.</h2>
+        <p style="font-size:clamp(1rem,2vw,1.2rem);max-width:54ch;color:#e7f3ff">Le vôtre peut être le prochain — et plus bas, une deuxième visite vous attend, au cœur de cette page.</p>
+        <div class="hero-cta">
+          <a class="btn btn-warm" href="#book">Demander mon devis</a>
+          <a class="btn btn-ghost" href="#film">Voir le projet réel ↓</a>
+        </div>
+      </div>
+    </div></div>
   </div>
 </section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true"><div class="track" id="mqTrack"></div></div>
 
 <!-- CHECK -->
 <section class="chapter" id="check">
@@ -243,7 +308,7 @@ footer .fine{border-top:1px solid rgba(255,255,255,.16);margin-top:34px;padding-
     </div>
     <div class="photo-wrap reveal">
       <span class="tag">Contrôle de l'unité extérieure</span>
-      <div class="photo"><img src="img/hero.jpg" alt="Unité extérieure entourée de feuilles pendant le contrôle" loading="lazy"></div>
+      <div class="photo" data-depth="10"><img src="img/hero.jpg" alt="Unité extérieure entourée de feuilles pendant le contrôle" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -320,6 +385,11 @@ footer .fine{border-top:1px solid rgba(255,255,255,.16);margin-top:34px;padding-
   <div class="wrap grid">
     <div class="reveal">
       <h2 class="big">Pourquoi les clients <span class="accent">nous choisissent</span></h2>
+      <div class="stats">
+        <div class="stat"><div class="num"><span data-count="12">0</span></div><div class="lbl">ans d'expérience</div></div>
+        <div class="stat"><div class="num"><span data-count="6">0</span></div><div class="lbl">services experts</div></div>
+        <div class="stat"><div class="num"><span data-count="3">0</span></div><div class="lbl">systèmes : split, gainable, VRV</div></div>
+      </div>
       <div class="cards" style="grid-template-columns:1fr 1fr;margin-top:24px">
         <article class="card" data-tilt><div class="ic" aria-hidden="true">🎓</div><h3>12 ans d'expérience</h3><p>Ayoub El Jarti, frigoriste de métier — un savoir-faire forgé sur le terrain, à Tanger.</p></article>
         <article class="card" data-tilt><div class="ic" aria-hidden="true">🧾</div><h3>Un prix avant de commencer</h3><p>Diagnostic d'abord, devis clair ensuite. Aucune surprise sur la facture.</p></article>
@@ -329,7 +399,7 @@ footer .fine{border-top:1px solid rgba(255,255,255,.16);margin-top:34px;padding-
     </div>
     <div class="photo-wrap reveal">
       <span class="tag">Le résultat : le confort, livré</span>
-      <div class="photo"><img src="img/living.jpg" alt="Salon confortable et chauffé, neige dehors" loading="lazy"></div>
+      <div class="photo" data-depth="14"><img src="img/living.jpg" alt="Salon confortable et chauffé, neige dehors" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -432,13 +502,12 @@ document.getElementById("year").textContent = new Date().getFullYear();
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* header + progress + hero parallax */
-const header = document.getElementById("siteHeader"), prog = document.getElementById("progress"), heroBg = document.getElementById("heroBg");
+const header = document.getElementById("siteHeader"), prog = document.getElementById("progress");
 addEventListener("scroll", ()=>{
   const y = scrollY;
   header.classList.toggle("scrolled", y>40);
   const h = document.documentElement.scrollHeight - innerHeight;
   prog.style.width = (h>0 ? (y/h)*100 : 0) + "%";
-  if(!reduced && y < innerHeight) heroBg.style.transform = "scale(1.06) translateY(" + (y*0.18) + "px)";
 }, {passive:true});
 
 /* mobile menu */
@@ -506,52 +575,130 @@ bH.addEventListener("click", ()=>{ mode="heat"; bH.setAttribute("aria-pressed","
 bC.addEventListener("click", ()=>{ mode="cool"; bC.setAttribute("aria-pressed","true"); bH.setAttribute("aria-pressed","false"); paint(); });
 paint();
 
-/* ===== FILM FPV : canvas piloté par le scroll ===== */
+/* ===== couche mondiale : marquee ===== */
 (function(){
-  const N = 96, frames = new Array(N), zone = document.querySelector(".film-zone"),
-        canvas = document.getElementById("filmCanvas"), ctx = canvas.getContext("2d"),
-        pctEl = document.getElementById("filmPct"), bar = document.getElementById("filmBar"),
+  const words = ["INSTALLATION","DÉPANNAGE","ENTRETIEN","RECHARGE DE GAZ","OPTIMISATION","CONSEIL"];
+  const seq = words.map(w=>"<span>"+w+" <b>✦</b></span>").join("");
+  document.getElementById("mqTrack").innerHTML = seq + seq;
+})();
+
+/* ===== compteurs ===== */
+(function(){
+  const cio = new IntersectionObserver(es=>{
+    es.forEach(en=>{
+      if(!en.isIntersecting) return;
+      const el = en.target, target = +el.dataset.count;
+      if(reduced){ el.textContent = target; }
+      else { let n = 0; const t = setInterval(()=>{ n++; el.textContent = n; if(n>=target) clearInterval(t); }, 70); }
+      cio.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll("[data-count]").forEach(el=>cio.observe(el));
+})();
+
+/* ===== moteur de films par scroll (lerp, réversible) ===== */
+const filmEngines = [];
+function makeFilm(opts){
+  const frames = new Array(opts.n);
+  function load(i){
+    if(frames[i]) return frames[i];
+    const im = new Image();
+    im.src = opts.dir + opts.prefix + String(i+1).padStart(3,"0") + ".webp";
+    frames[i] = im; return im;
+  }
+  for(let i=0;i<Math.min(opts.n, 20);i++) load(i);
+  let bg = 20; const bt = setInterval(()=>{ for(let k=0;k<3 && bg<opts.n;k++) load(bg++); if(bg>=opts.n) clearInterval(bt); }, 90);
+  const eng = { cur: 0, lastDrawn: -1,
+    progress(){ const r = opts.zone.getBoundingClientRect(); const total = opts.zone.offsetHeight - innerHeight; return Math.min(Math.max(-r.top/(total||1), 0), 1); },
+    draw(p){
+      const idx = Math.min(opts.n-1, Math.floor(p*opts.n));
+      const im = frames[idx] || load(idx);
+      if(!im || !im.complete || !im.naturalWidth || idx === this.lastDrawn) return;
+      const cw = opts.canvas.width, ch = opts.canvas.height;
+      if(opts.cover){
+        const sc = Math.max(cw/im.naturalWidth, ch/im.naturalHeight);
+        const w = im.naturalWidth*sc, h = im.naturalHeight*sc;
+        opts.ctx.drawImage(im, (cw-w)/2, (ch-h)/2, w, h);
+      } else opts.ctx.drawImage(im, 0, 0, cw, ch);
+      this.lastDrawn = idx;
+    },
+    loadedCount(){ let c = 0; for(let i=0;i<Math.min(opts.n,24);i++) if(frames[i] && frames[i].complete && frames[i].naturalWidth) c++; return c; },
+    firstCount: Math.min(opts.n,24)
+  };
+  filmEngines.push(eng); return eng;
+}
+(function(){
+  const heroEng = makeFilm({ n: 100, dir: "frames-hero/", prefix: "h", zone: document.querySelector(".hero-zone"), canvas: document.getElementById("heroCanvas"), ctx: document.getElementById("heroCanvas").getContext("2d"), cover: true });
+  const ph1 = document.getElementById("heroPhase1"), ph2 = document.getElementById("heroPhase2");
+  heroEng.onProgress = p => { const show2 = p > .55; ph1.classList.toggle("off", show2); ph2.classList.toggle("off", !show2); };
+  /* canvas héros adapté à l'écran */
+  const hc = document.getElementById("heroCanvas");
+  function fitHero(){ const dpr = Math.min(devicePixelRatio||1, 1.6); hc.width = Math.round(innerWidth*dpr*.62); hc.height = Math.round(innerHeight*dpr*.62); heroEng.lastDrawn = -1; }
+  fitHero(); addEventListener("resize", fitHero);
+  /* préloader lié au préchargement réel */
+  const pl = document.getElementById("preloader"), plPct = document.getElementById("plPct"), plBar = document.getElementById("plBar");
+  document.body.style.overflow = "hidden";
+  let done = false;
+  function finish(){ if(done) return; done = true; plPct.textContent = "100%"; plBar.style.width = "100%"; setTimeout(()=>{ pl.classList.add("gone"); document.body.style.overflow = ""; setTimeout(()=>pl.remove(), 900); }, 250); }
+  const chk = setInterval(()=>{ const c = heroEng.loadedCount(), tot = heroEng.firstCount; const pc = Math.round(c/tot*100); plPct.textContent = pc + "%"; plBar.style.width = pc + "%"; if(c>=tot){ clearInterval(chk); finish(); } }, 100);
+  setTimeout(()=>{ clearInterval(chk); finish(); }, 4000);
+})();
+
+/* boucle rAF commune : films + profondeur */
+(function(){
+  const depthEls = [...document.querySelectorAll("[data-depth]")];
+  function frame(){
+    filmEngines.forEach(eng=>{
+      const target = reduced ? eng.progress() : null;
+      const p = eng.progress();
+      eng.cur += ((p) - eng.cur) * (reduced ? 1 : .12);
+      if(Math.abs(p - eng.cur) < .0005) eng.cur = p;
+      eng.draw(eng.cur);
+      if(eng.onProgress) eng.onProgress(eng.cur);
+    });
+    if(!reduced){
+      const mid = innerHeight/2;
+      depthEls.forEach(el=>{
+        const r = el.getBoundingClientRect();
+        if(r.bottom < -80 || r.top > innerHeight + 80) return;
+        const off = ((r.top + r.height/2) - mid) / innerHeight;
+        el.style.transform = "translateY(" + (off * -(+el.dataset.depth)) + "px)";
+      });
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* curseur personnalisé (pointeur fin) */
+(function(){
+  if(!matchMedia("(pointer: fine)").matches || reduced) return;
+  const dot = document.getElementById("cursorDot"), ring = document.getElementById("cursorRing");
+  let mx = -100, my = -100, rx = -100, ry = -100;
+  addEventListener("mousemove", e=>{ mx = e.clientX; my = e.clientY; dot.style.left = mx+"px"; dot.style.top = my+"px"; });
+  (function follow(){ rx += (mx-rx)*.16; ry += (my-ry)*.16; ring.style.left = rx+"px"; ring.style.top = ry+"px"; requestAnimationFrame(follow); })();
+  document.addEventListener("mouseover", e=>{ if(e.target.closest("a,button,[data-tilt],input,select,textarea,summary")) ring.classList.add("grow"); });
+  document.addEventListener("mouseout", e=>{ if(e.target.closest("a,button,[data-tilt],input,select,textarea,summary")) ring.classList.remove("grow"); });
+})();
+
+
+/* ===== FILM FPV milieu : enregistré dans le moteur partagé ===== */
+(function(){
+  const pctEl = document.getElementById("filmPct"), bar = document.getElementById("filmBar"),
         sN = document.getElementById("filmStepN"), sT = document.getElementById("filmStepT"), sP = document.getElementById("filmStepP");
   const STEPS = [
     {n:"ÉTAPE 1 / 3", t:"Les unités prennent place", p:"Des splits posés proprement, pièce par pièce, dans un appartement réel de Tanger."},
     {n:"ÉTAPE 2 / 3", t:"De l'intérieur vers l'extérieur", p:"La visite traverse l'appartement et descend jusqu'aux unités extérieures."},
     {n:"ÉTAPE 3 / 3", t:"Le confort, livré", p:"Installation terminée, réglages faits : le client profite, nous restons joignables."}
   ];
-  let curStep = -1, lastIdx = -1;
-  function load(i){
-    if(frames[i]) return frames[i];
-    const im = new Image();
-    im.src = "frames/f" + String(i+1).padStart(3,"0") + ".webp";
-    frames[i] = im; return im;
-  }
-  for(let i=0;i<16;i++) load(i);
-  let bg = 16;
-  const bgTimer = setInterval(()=>{ load(bg); bg++; if(bg>=N) clearInterval(bgTimer); }, 120);
-  function draw(idx){
-    const im = frames[idx] || load(idx);
-    if(im && im.complete && im.naturalWidth){
-      ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
-    }
-  }
-  function update(){
-    const r = zone.getBoundingClientRect();
-    const total = zone.offsetHeight - innerHeight;
-    const scrolled = Math.min(Math.max(-r.top, 0), total);
-    const p = total>0 ? scrolled/total : 0;
-    const idx = Math.min(N-1, Math.floor(p*N));
-    if(idx !== lastIdx){ draw(idx); lastIdx = idx; }
+  let curStep = -1;
+  const eng = makeFilm({ n: 96, dir: "frames/", prefix: "f", zone: document.querySelector(".film-zone"), canvas: document.getElementById("filmCanvas"), ctx: document.getElementById("filmCanvas").getContext("2d"), cover: false });
+  eng.onProgress = p => {
     pctEl.textContent = Math.round(p*100) + "%";
     bar.style.width = (p*100) + "%";
-    const s = p < .34 ? 0 : (p < .72 ? 1 : 2);
-    if(s !== curStep){ curStep = s; sN.textContent = STEPS[s].n; sT.textContent = STEPS[s].t; sP.textContent = STEPS[s].p; }
-  }
-  if(reduced){ load(40); frames[40].onload = ()=>draw(40); pctEl.textContent = "—"; }
-  else {
-    let ticking = false;
-    addEventListener("scroll", ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(()=>{ update(); ticking = false; }); } }, {passive:true});
-    addEventListener("resize", update);
-    frames[0].onload = update; update();
-  }
+    const st = p < .34 ? 0 : (p < .72 ? 1 : 2);
+    if(st !== curStep){ curStep = st; sN.textContent = STEPS[st].n; sT.textContent = STEPS[st].t; sP.textContent = STEPS[st].p; }
+  };
 })();
 
 /* filter tool */
